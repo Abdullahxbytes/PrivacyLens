@@ -1,0 +1,38 @@
+# Render Blueprint configuration for PrivacyLens deployment
+# https://render.com/docs/blueprint
+
+services:
+  # Backend API Service
+  - type: web
+    name: privacylens-backend
+    env: node
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: PORT
+        value: "4000"
+      - key: GROQ_API_KEY
+        sync: false  # Will be set in Render dashboard
+      - key: GROQ_MODEL
+        value: "openai/gpt-oss-120b"
+    autoDeploy: true
+    plan: free
+
+  # Frontend Web Service
+  - type: web
+    name: privacylens-frontend
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://privacylens-backend.onrender.com"  # Will be auto-updated after backend deploys
+    autoDeploy: true
+    plan: free
+
+# Note: After initial deployment:
+# 1. The backend service will be deployed first
+# 2. Update the frontend's NEXT_PUBLIC_API_URL environment variable with the actual backend URL
+# 3. Redeploy the frontend service
